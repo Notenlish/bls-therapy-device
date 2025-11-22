@@ -30,3 +30,60 @@
 *.exe
 *.out
 *.app
+
+
+
+
+# esp32 stuff
+
+# --- ESP-IDF build files ---
+/build/
+/sdkconfig.old
+/sdkconfig
+
+# --- Default IDF Python virtual environment directories ---
+/.env/
+/venv/
+/.python_env/
+/idf-env/
+
+# --- VSCode configs ---
+.vscode/
+
+# --- CMake/Make intermediate files ---
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# --- Python cache ---
+__pycache__/
+*.pyc
+
+# --- ESP-IDF example project leftovers ---
+# (Generated when running idf.py menuconfig or build)
+*.log
+*.elf
+*.map
+*.bin
+*.bin.enc
+*.ota
+
+# --- Partition table build outputs ---
+partition_table/
+
+# --- Flash image outputs ---
+*.bin
+*.hex
+
+# --- Debugger files ---
+*.gdbinit
+
+# --- CLion and JetBrains IDE ---
+.idea/
+
+# --- macOS / Linux / Windows clutter ---
+.DS_Store
+Thumbs.db
+
+build/
