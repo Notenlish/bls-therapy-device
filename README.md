@@ -1,5 +1,11 @@
 # bls-therapy-device
  
+getting local network ip:
+use `ipconfig` to get ip address on windows(ipv4 address)
+use `ifconfig` to get ip address on linux
+
+
+
 `idf.py build`
 
 to get idf.py, you need to call `getidf` --> alias for export.sh in esp-idf folder.
