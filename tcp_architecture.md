@@ -14,3 +14,7 @@ STOP --> STOPs the motors
 the backend will basically act as a proxy for the frontend(client)
 
 client sends http requests --> the json body converted into meaningful socket requests --> backend sends them --> gets the response --> replies back to the frontend.
+
+
+I cant just do:
+client -----> esp32 via websockets because esp32 has to be client, and the frontend(browser) cannto be client either.
