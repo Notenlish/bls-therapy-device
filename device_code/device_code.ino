@@ -3,15 +3,15 @@
 
 #include <secrets.h>
 
-const char* host = "192.168.1.111";  // ip or dns
+const char* host = "10.14.95.33";  // ip or dns
 const uint16_t port = 8290;
 
 WiFiMulti WiFiMulti;
 WiFiClient client;  // or use NetworkClient?
-const int LED_PIN = 8;
+const int LED_PIN = 4;
 
-bool IS_MOTOR = false;
-bool IS_RIGHT_MOTOR = true;
+bool IS_MOTOR = true;
+bool IS_RIGHT_MOTOR = false;
 bool IS_LEFT_MOTOR = !IS_RIGHT_MOTOR;
 
 
@@ -24,10 +24,12 @@ bool motor_should_activate = false;
 int ball_direction = 1;                                               // 1(right) or -1(left)
 float ball_pos = wall_hit_duration + (between_areas_duration / 2.0);  // center of map
 int ball_path_total_duration = (2 * wall_hit_duration) + between_areas_duration;
-int ball_period = 2000;  // ms
+int ball_period = 4000;  // ms
 float ball_speed = (2.0 * ball_path_total_duration) / (float)ball_period;
 
 uint32_t lastBallUpdate = 0.0;  // ms
+
+float motorPower = 0.5f;
 
 // reconnect
 uint32_t lastConnectAttempt = 0;
@@ -142,7 +144,7 @@ void handleMotorStuff() {
     // motor vibration
     int pwm = 0;
     if (motor_should_activate) {
-      pwm = 255;
+      pwm = (float)255 * motorPower;
     }
 
     activateMotor(motor_should_activate, pwm, left_side, right_side);
@@ -159,6 +161,7 @@ void handleMotorStuff() {
 void processCommand(const String& line) {
   if (line.length() < 4) return;
   String cmd = line.substring(0, 4);
+  String rest = line.substring(4);
 
   if (cmd == "STRT") {
     ball_active = true;
@@ -172,8 +175,13 @@ void processCommand(const String& line) {
     client.println("OK STRT");
   } else if (cmd == "STOP") {
     ball_active = false;
-
     client.println("OK STOP");
+
+  } else if (cmd == "SETP") {
+    motorPower = rest.toFloat();
+    motorPower = constrain(motorPower, 0.0f, 1.0f);
+    client.println("SET POWER:");
+    client.println(String(motorPower));
   } else {
     client.println("ERR UNKNOWN");
   }

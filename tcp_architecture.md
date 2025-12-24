@@ -6,6 +6,10 @@ OPEN --> OPEN's connection(used to check if connected)
 HRBT --> Heartbeat
 SETP [float between 0 and 1] --> set power of motors
 GETB --> get battery level --> responds back with BATL [float between 0 and 1]
+PERD --> Sets period(of the bls stuff)
+SWHD --> Set wall hit duration
+SBAD --> set between areas duration
+ISAC --> IS_ACTIVE(get whether the motor has stopped or is active).
 CLOS --> CLOSes connection
 STRT --> STaRTs the motors
 STOP --> STOPs the motors
