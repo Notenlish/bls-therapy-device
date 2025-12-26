@@ -1,11 +1,13 @@
 <script lang="ts">
-	import favicon from '$lib/assets/favicon.svg';
+  import "./layout.css";
+  import favicon from "$lib/assets/favicon.svg";
 
-	let { children } = $props();
+  import Appheader from "../component/appheader.svelte";
+
+  let { children } = $props();
 </script>
 
-<svelte:head>
-	<link rel="icon" href={favicon} />
-</svelte:head>
+<svelte:head><link rel="icon" href={favicon} /></svelte:head>
+<Appheader title="Web Arayüzü" />
 
-{@render children()}
+<main class="bg-surface-50 p-4 min-h-screen">{@render children()}</main>

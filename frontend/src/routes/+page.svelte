@@ -2,8 +2,16 @@
   let connected = $state(false);
   let latestReceived = $state("");
   let powerLevelToSet = $state(0.5);
+  let motorPower = $state(50);
+  let setMotorPower = (e: number[]) => {
+    motorPower = e[0];
+  };
+
+  import BallController from "../component/ballcontroller.svelte";
 
   import { onMount } from "svelte";
+  import Controllergrid from "../component/controllergrid.svelte";
+  import Basiccontroller from "../component/basiccontroller.svelte";
 
   const sendRequest = async (cmd_name: string, payload: string = "") => {
     const res = await fetch("/api/send-request", {
@@ -39,8 +47,7 @@
   });
 </script>
 
-<header><h1>Web Arayüzü</h1></header>
-<main>
+<div>
   <p>esp32c3'ü kontrol etmek için olan bir test arayüzü.</p>
 
   <p>
@@ -50,6 +57,11 @@
     <br />
     Latest received: {JSON.stringify(latestReceived)}
   </p>
+
+  <Controllergrid>
+    <Basiccontroller {motorPower} {setMotorPower}></Basiccontroller>
+    <BallController></BallController>
+  </Controllergrid>
 
   <div class="control-grid">
     <div class="controller">
@@ -92,10 +104,10 @@
       </form>
     </div>
   </div>
-</main>
+</div>
 
 <style>
-  :global(.roboto-font) {
+  /* :global(.roboto-font) {
     font-family: "Roboto", sans-serif;
     font-optical-sizing: auto;
     font-style: normal;
@@ -157,5 +169,5 @@
     margin: 0;
     font-weight: 500;
     font-size: 1.4rem;
-  }
+  } */
 </style>

@@ -11,7 +11,7 @@ WiFiClient client;  // or use NetworkClient?
 const int LED_PIN = 4;
 
 bool IS_MOTOR = true;
-bool IS_RIGHT_MOTOR = false;
+bool IS_RIGHT_MOTOR = true;
 bool IS_LEFT_MOTOR = !IS_RIGHT_MOTOR;
 
 
@@ -180,7 +180,7 @@ void processCommand(const String& line) {
   } else if (cmd == "SETP") {
     motorPower = rest.toFloat();
     motorPower = constrain(motorPower, 0.0f, 1.0f);
-    client.println("SET POWER:");
+    client.print("SET POWER:");
     client.println(String(motorPower));
   } else {
     client.println("ERR UNKNOWN");
