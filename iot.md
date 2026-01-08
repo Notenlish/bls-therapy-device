@@ -1,3 +1,15 @@
+# Device modes
+
+1) Setup
+
+2) Pairing
+
+3) Paired
+
+4) InSession
+
+
+
 # terapist kullanıcı rehberi 1: Kurulum.
 
 1) Yeni aldığınız cihazı kutusundan çıkarın

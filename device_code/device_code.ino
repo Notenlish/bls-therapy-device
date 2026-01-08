@@ -1,18 +1,24 @@
+
 #include <WiFi.h>
 #include <WiFiMulti.h>
+#include <Preferences.h>
 
 #include <secrets.h>
+#include <device_types.h>
+#include <device_utils.h>
 
-const char* host = "10.14.95.33";  // ip or dns
-const uint16_t port = 8290;
 
-WiFiMulti WiFiMulti;
+// TODO: Go check esp32c3 mini pinouts to see what pins should be used for status led. 
+
+Preferences prefs;
+
+TherapyDevice::DeviceMode device_mode = TherapyDevice::DeviceMode::Setup;
+TherapyDevice::MotorState motor_state = TherapyDevice::MotorState::Active;
+
+
+WiFiMulti WiFiMulti;  // TODO: I am pretty sure I dont need both wifi and wifimulti
 WiFiClient client;  // or use NetworkClient?
 const int LED_PIN = 4;
-
-bool IS_MOTOR = true;
-bool IS_RIGHT_MOTOR = true;
-bool IS_LEFT_MOTOR = !IS_RIGHT_MOTOR;
 
 
 // for simulating ball going from left to right to left etc.
@@ -39,11 +45,31 @@ const uint32_t RECONNECT_MS = 2000;
 String rxLine;
 
 void setup() {
+  // TODO: I forgot to do the actual thing, which is giving the webpage the ability to send over the wifi credentials. im dumb .d
+  prefs.begin("wifi", true);
+  ssid = prefs.getString("ssid","");
+  password = prefs.getString("password", "");
+
+  if (ssid.length() == 0) {
+    prefs.end();
+    enterSetupMode(prefs);
+  } else {
+    connected = attemptWifiConnection();
+    if (connected) {
+      enterPairMode();
+    } else {
+      enterSetupMode();
+    }
+  }
+
+
   pinMode(LED_PIN, OUTPUT);
 
   Serial.begin(115200);
   Serial.println("AAAAAAAAAAAAAAAAAAAAAAAAAAA");
   delay(10);
+
+
 
   WiFiMulti.addAP(WIFI_SSID, WIFI_PASSWORD);
 
