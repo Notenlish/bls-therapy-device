@@ -16,9 +16,9 @@
 
 2) Web uygulamasında "cihaz kurulumu" sayfasına gidin 
 
-3) Cihazınızın arkasındaki QR kodunu okutun --> TherapySetup-[XXXXX] adlı wifi ağına bağlanın.
+3) Cihazınızın arkasındaki QR kodunu okutun --> Web sayfası yeni wifi'ye geçmenizi isteyecek. --> SetupTherapyDevice-[XXXXX] adlı geçici wifi ağına bağlanın.
 
-4) Wifi ağına bağlandığınız zaman telefonunuz otomatik olarak sizi bir web portalına yönlendirecek. Web portalı içerisinden Wi-Fi adını ve şifresini giriniz.
+4) Geçici Wifi ağına bağlandığınız zaman telefonunuz otomatik olarak sizi bir web portalına yönlendirecek. Web portalı içerisinden kullandığınız Wi-Fi adını ve şifresini giriniz.
 
 6) "Wi-Fi Bilgilerini Kaydet" tuşuna basın.
 

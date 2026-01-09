@@ -6,9 +6,34 @@
 #include <secrets.h>
 #include <device_types.h>
 #include <device_utils.h>
+#include <device_setup.h>
+
+#define MAX_SSIDS 128
+
+#if DEVMODE
+constexpr DeviceInfo device_info = {
+  .deviceId = {
+    'D',
+    'E',
+    'V',
+    '0' + (DEVICE_ID / 10),
+    '0' + (DEVICE_ID % 10),
+    '\0' }
+};
+#else
+constexpr device_info = {
+  .deviceId = {
+    '0' + (DEVICE_ID / 10000),
+    '0' + (DEVICE_ID / 1000),
+    '0' + (DEVICE_ID / 100),
+    '0' + (DEVICE_ID / 10),
+    '0' + (DEVICE_ID % 10),
+    '\0' }
+};
+#endif
 
 
-// TODO: Go check esp32c3 mini pinouts to see what pins should be used for status led. 
+// TODO: Go check esp32c3 mini pinouts to see what pins should be used for status led.
 
 Preferences prefs;
 
@@ -17,7 +42,7 @@ TherapyDevice::MotorState motor_state = TherapyDevice::MotorState::Active;
 
 
 WiFiMulti WiFiMulti;  // TODO: I am pretty sure I dont need both wifi and wifimulti
-WiFiClient client;  // or use NetworkClient?
+WiFiClient client;    // or use NetworkClient?
 const int LED_PIN = 4;
 
 
@@ -45,14 +70,43 @@ const uint32_t RECONNECT_MS = 2000;
 String rxLine;
 
 void setup() {
+  String ssid_list[MAX_SSIDS];
+  reserveSsidList(ssid_list);
+
   // TODO: I forgot to do the actual thing, which is giving the webpage the ability to send over the wifi credentials. im dumb .d
   prefs.begin("wifi", true);
-  ssid = prefs.getString("ssid","");
-  password = prefs.getString("password", "");
+  String ssid = prefs.getString("ssid", "");
+  String password = prefs.getString("password", "");
+  prefs.end();
 
   if (ssid.length() == 0) {
-    prefs.end();
-    enterSetupMode(prefs);
+    // open softap mode and wait for connection.
+    device_mode = TherapyDevice::DeviceMode::Setup;
+    ssid = generateSSID(device_info);
+    bool softAP_active = WiFi.softAP(ssid);
+    if (softAP_active) {
+      Serial.println("AP created successfully!");
+      Serial.print("IP Address: ");
+      Serial.println(WiFi.softAPIP());
+      
+      int numSSID = WiFi.scanNetworks();
+      if (numSSID == -1) {
+        Serial.println("Couldn't get a wifi connection");
+        return;  // TODO: what would I even do here?
+      }
+
+      
+      for(int net=0; net<numSSID; net++) {
+        String netSSID = WiFi.SSID(net);
+        ssid_list[net] = netSSID;
+      }
+
+      WiFiServer server(80);
+      server.begin();
+      return;
+    }else {
+      Serial.println("Could not create softAP :(");
+    }
   } else {
     connected = attemptWifiConnection();
     if (connected) {
@@ -88,6 +142,14 @@ void setup() {
   Serial.println(WiFi.localIP());  // not being able to get local ip.
 
   delay(500);
+}
+
+void loop() {
+  if (device_mode == TherapyDevice::DeviceMode::Setup) {
+    handleSoftAP(ssid_list);
+  }
+  handleNetworkTask();
+  handleMotorStuff();
 }
 
 // ignore pwm if debugging, just set HIGH or LOW depending on state.
@@ -250,10 +312,4 @@ void handleNetworkTask() {
       else rxLine = "";  // reset if something weird happens
     }
   }
-}
-
-
-void loop() {
-  handleNetworkTask();
-  handleMotorStuff();
 }
