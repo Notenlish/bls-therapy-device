@@ -15,7 +15,6 @@ void handleSoftAP(WiFiServer &server, String (&ssid_list)[MAX_SSIDS], HTTPReques
   while (client.connected() && millis() - st < 1000) {
     if (!client.available()) continue;
 
-    // TODO: actually parse it.
     // first parse the method, path etc.
     // and then the data(must be json)
     // then try to connect, depending on whether it works or not, then just send back a "successful" or "unsuccessful" message.
@@ -42,7 +41,6 @@ void handleSoftAP(WiFiServer &server, String (&ssid_list)[MAX_SSIDS], HTTPReques
       if (line.startsWith("Content-Length")) {
         http_req.content_length = line.substring(strlen("Content-Length: ")).trim().toInt();
       }
-
 
       if (line == "\r") {  // if just an empty line(\r\n)
         in_headers = false;
@@ -95,6 +93,11 @@ bool parsePostData(HttpRequest &http_req, WiFiCredentials &wifi_credentials) {
     Serial.println("ssid / password missing.");
     return false;
   }
+  
+  if(obj.hasOwnProperty("customssid")) {
+    obj["ssid"] = obj["customssid"];
+  }
+
   wifi_credentials.ssid = obj["ssid"];
   wifi_credentials.password = obj["password"]);
   return true;
