@@ -93,8 +93,8 @@ bool parsePostData(HttpRequest &http_req, WiFiCredentials &wifi_credentials) {
     Serial.println("ssid / password missing.");
     return false;
   }
-  
-  if(obj.hasOwnProperty("customssid")) {
+
+  if (obj.hasOwnProperty("customssid")) {
     obj["ssid"] = obj["customssid"];
   }
 
@@ -148,5 +148,16 @@ void sendPage(WiFiClient &client, String (&ssid_list)[MAX_SSIDS]) {
 }
 
 void sendStatus(WiFiClient &client, bool &successful) {
-  // TODO: implement this.
+  int content_length;
+  if (successful) content_length = strlen("{ \"valid\":\"true\" }");
+  else content_length = strlen("{ \"valid\":\"false\" }");
+
+  client.print(
+    "HTTP/1.1 200 OK\r\n"
+    "Content-Type: application/json; charset=utf-8\r\n"
+    "Content-Length: "
+    "Connection: close\r\n");
+
+  if (successful) client.print("{ \"valid\":\"true\" }");
+  else client.print("{ \"valid\":\"false\" }");
 }

@@ -72,7 +72,6 @@ void setup() {
         Serial.println("Couldn't get a wifi connection");
         return;  // TODO: what would I even do here?
       }
-
       
       for(int net=0; net<numSSID; net++) {
         String netSSID = WiFi.SSID(net);
@@ -102,7 +101,6 @@ void setup() {
   delay(10);
 
 
-
   WiFiMulti.addAP(WIFI_SSID, WIFI_PASSWORD);
 
   Serial.println();
@@ -125,7 +123,7 @@ void setup() {
 void loop() {
   HTTPRequest http_req;
   if (device_mode == TherapyDevice::DeviceMode::Setup) {
-    handleSoftAP(server, ssid_list, http_req.);
+    handleSoftAP(server, ssid_list, http_req);
   }
   handleNetworkTask();
   handleMotorStuff();

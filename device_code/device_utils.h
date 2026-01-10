@@ -50,7 +50,7 @@ bool attemptWifiConnection(WiFiMulti &wifi_multi, String ssid, String password) 
   WiFi.begin(ssid.c_str(), password.c_str());
 
   unsigned long start = millis();
-  const unsigned long WIFI_TIMEOUT = 10000;
+  const unsigned long WIFI_TIMEOUT = 7000;
 
   while (WiFi.status() != WL_CONNECTED && millis() - start < WIFI_TIMEOUT) {
     delay(100);
