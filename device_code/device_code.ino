@@ -8,29 +8,7 @@
 #include <device_utils.h>
 #include <device_setup.h>
 
-#define MAX_SSIDS 128
-
-#if DEVMODE
-constexpr DeviceInfo device_info = {
-  .deviceId = {
-    'D',
-    'E',
-    'V',
-    '0' + (DEVICE_ID / 10),
-    '0' + (DEVICE_ID % 10),
-    '\0' }
-};
-#else
-constexpr device_info = {
-  .deviceId = {
-    '0' + (DEVICE_ID / 10000),
-    '0' + (DEVICE_ID / 1000),
-    '0' + (DEVICE_ID / 100),
-    '0' + (DEVICE_ID / 10),
-    '0' + (DEVICE_ID % 10),
-    '\0' }
-};
-#endif
+#include <device_constants.h>
 
 
 // TODO: Go check esp32c3 mini pinouts to see what pins should be used for status led.
@@ -43,7 +21,6 @@ TherapyDevice::MotorState motor_state = TherapyDevice::MotorState::Active;
 
 WiFiMulti WiFiMulti;  // TODO: I am pretty sure I dont need both wifi and wifimulti
 WiFiClient client;    // or use NetworkClient?
-const int LED_PIN = 4;
 
 
 // for simulating ball going from left to right to left etc.
@@ -61,6 +38,7 @@ float ball_speed = (2.0 * ball_path_total_duration) / (float)ball_period;
 uint32_t lastBallUpdate = 0.0;  // ms
 
 float motorPower = 0.5f;
+
 
 // reconnect
 uint32_t lastConnectAttempt = 0;
@@ -145,8 +123,9 @@ void setup() {
 }
 
 void loop() {
+  HTTPRequest http_req;
   if (device_mode == TherapyDevice::DeviceMode::Setup) {
-    handleSoftAP(ssid_list);
+    handleSoftAP(server, ssid_list, http_req.);
   }
   handleNetworkTask();
   handleMotorStuff();

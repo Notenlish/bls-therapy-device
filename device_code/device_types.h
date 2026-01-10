@@ -6,6 +6,19 @@
   #define DEVMODE true
 #endif
 
+struct HTTPRequest {
+  String method;
+  String uri;
+  String body;
+  String content_type;
+  unsigned int content_length;
+}
+
+struct WiFiCredentials {
+  String ssid;
+  String password;
+}
+
 struct Color {
   uint8_t r, g, b;
 };
