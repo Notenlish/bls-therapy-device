@@ -1,10 +1,4 @@
-#ifndef DEVICE_ID
-  #define DEVICE_ID 0
-#endif
-
-#ifndef DEVMODE
-  #define DEVMODE true
-#endif
+#pragma once
 
 struct HTTPRequest {
   String method;
@@ -12,19 +6,20 @@ struct HTTPRequest {
   String body;
   String content_type;
   unsigned int content_length;
-}
+};
 
 struct WiFiCredentials {
   String ssid;
   String password;
-}
+};
 
 struct Color {
   uint8_t r, g, b;
 };
 
 struct DeviceInfo {
-  char deviceId[6];
+  char device_id[6];
+  char pairing_secret[64+1];
 };
 
 namespace TherapyDevice {

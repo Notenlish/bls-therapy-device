@@ -2,8 +2,12 @@
 
 @import '@skeletonlabs/skeleton'; 
 @import '@skeletonlabs/skeleton-svelte'; 
+
+/* https://www.realtimecolors.com/?colors=070807-f8faf8-5baf65-9ddda5-5adb69&fonts=Inter-Inter */
+
+
 /* @import '@skeletonlabs/skeleton/themes/cerberus';  */
-@import '@skeletonlabs/skeleton/themes/mint'; 
+/* @import '@skeletonlabs/skeleton/themes/mint';  */
 
 /* theme name should be either mint or pine*/
 

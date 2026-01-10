@@ -1,3 +1,5 @@
+#pragma once
+
 String htmlEscape(const String &s) {
   String out;
   out.reserve(s.length());
@@ -30,12 +32,18 @@ Color statusLedColor(TherapyDevice::DeviceMode mode) {
 }
 
 void enterSetupMode(Preferences &prefs) {
+  Serial.println("Entering setup mode.");
   prefs.begin("wifi", false);
   prefs.putString("ssid", "");
   prefs.putString("password", "");
   prefs.end();
 
   ESP.restart();
+}
+
+void enterPairingMode(Preferences &prefs) {
+  // TODO: status led must be lighting green.
+  // TODO: actually write this.
 }
 
 void reserveSsidList(String ssid_list[MAX_SSIDS]) {
@@ -45,9 +53,9 @@ void reserveSsidList(String ssid_list[MAX_SSIDS]) {
 }
 
 // TODO: maybe move these over to a "DeviceUtils" Namespace?
-bool attemptWifiConnection(WiFiMulti &wifi_multi, String ssid, String password) {
+bool attemptWifiConnection(WiFiCredentials saved_credentials) {
   WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid.c_str(), password.c_str());
+  WiFi.begin(saved_credentials.ssid.c_str(), saved_credentials.password.c_str());
 
   unsigned long start = millis();
   const unsigned long WIFI_TIMEOUT = 7000;
@@ -65,6 +73,6 @@ bool attemptWifiConnection(WiFiMulti &wifi_multi, String ssid, String password) 
 
 String generateSSID(DeviceInfo device_info) {
   String s;
-  s = "SetupTherapyDevice" + device_info.deviceId;
+  s = String("SetupTherapyDevice" + String(device_info.device_id));
   return s.c_str();
 }

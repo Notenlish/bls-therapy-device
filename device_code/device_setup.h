@@ -5,81 +5,9 @@
 #include <WiFi.h>
 #include <device_types.h>
 #include <device_constants.h>
+#include <Preferences.h>
 
-void handleSoftAP(WiFiServer &server, String (&ssid_list)[MAX_SSIDS], HTTPRequest &http_req) {
-  WiFiClient client = server.available();
-  if (!client) return;
-
-  bool in_headers = true;
-  unsigned long st = millis();
-  while (client.connected() && millis() - st < 1000) {
-    if (!client.available()) continue;
-
-    // first parse the method, path etc.
-    // and then the data(must be json)
-    // then try to connect, depending on whether it works or not, then just send back a "successful" or "unsuccessful" message.
-
-    String line = client.readStringUntil('\n');
-
-    if (in_headers) {
-      if (line.startsWith("GET")) {
-        http_req.method = "get";
-
-        // length of 'GET ' is 4.
-        http_req.uri = line.substring(4, line.indexOf(" ")).trim();
-      }
-      if (line.startsWith("POST")) {
-        http_req.method = "post";
-
-        // length of 'POST ' is 5.
-        http_req.uri = line.substring(5, line.indexOf(" ")).trim();
-      }
-
-      if (line.startsWith("Content-Type")) {
-        http_req.content_type = line.substring(strlen("Content-Type: ")).trim();
-      }
-      if (line.startsWith("Content-Length")) {
-        http_req.content_length = line.substring(strlen("Content-Length: ")).trim().toInt();
-      }
-
-      if (line == "\r") {  // if just an empty line(\r\n)
-        in_headers = false;
-        break;
-      }
-    }
-  }
-
-  if (http_req.method == "get" && http_req.uri == "/") {
-    sendPage(client, ssid_list);
-  }
-
-  if (http_req.method == "post" && http_req.uri == "/wifi" && http_req.content_length > 0) {
-    // wait for all of the body.
-    unsigned long bt = millis();
-    while (client.connected() && client.available() < http_req.content_length && millis() - bt < 2000) {
-      delay(1);
-    }
-
-    String body;
-    body.reserve(contentLength);
-
-    while ((int)body.length() < contentLength && client.connected()) {
-      if (client.available()) {
-        body += (char)client.read();
-      }
-    }
-
-    http_req.body = body;
-    WiFiCredentials wifi_credentials;
-    bool if_valid_credentials = parsePostData(http_req, wifi_credentials);
-
-    sendStatus(client, if_valid_credentials);
-  }
-
-  client.stop();
-}
-
-bool parsePostData(HttpRequest &http_req, WiFiCredentials &wifi_credentials) {
+bool parsePostData(HTTPRequest &http_req, WiFiCredentials &wifi_credentials) {
   JSONVar obj = JSON.parse(http_req.body);
   if (JSON.typeof(obj) == "undefined") {
     Serial.println("Parsing input failed!");
@@ -95,20 +23,22 @@ bool parsePostData(HttpRequest &http_req, WiFiCredentials &wifi_credentials) {
   }
 
   if (obj.hasOwnProperty("customssid")) {
-    obj["ssid"] = obj["customssid"];
+    obj["ssid"] = (String)obj["customssid"];
   }
 
-  wifi_credentials.ssid = obj["ssid"];
-  wifi_credentials.password = obj["password"]);
+  wifi_credentials.ssid = (String)obj["ssid"];
+  wifi_credentials.password = (String)obj["password"];
   return true;
 }
 
 void sendPage(WiFiClient &client, String (&ssid_list)[MAX_SSIDS]) {
+  // F() is used to make these texts stay in flash and not be copied to ram.
+  
   // HTTP response headers
-  client.print(
+  client.print(F(
     "HTTP/1.1 200 OK\r\n"
     "Content-Type: text/html; charset=utf-8\r\n"
-    "Connection: close\r\n");
+    "Connection: close\r\n"));
 
   // HTML Body
   client.print(F(
@@ -117,7 +47,7 @@ void sendPage(WiFiClient &client, String (&ssid_list)[MAX_SSIDS]) {
     "<title>WiFi Setup</title>"
     "</head><body>"
     "<h1>Select WiFi</h1>"
-    "<form method='POST' action='/save'"
+    "<form method='POST' action='/save'>"
     "<label for='ssid'>SSID</label><br>"
     "<select id='ssid' name='ssid'>"));
 
@@ -126,10 +56,10 @@ void sendPage(WiFiClient &client, String (&ssid_list)[MAX_SSIDS]) {
     if (ssid_list[i].length() == 0) continue;
     String esc = htmlEscape(ssid_list[i]);
     client.print(F("<option value='"));
-    client.print(F(esc));
+    client.print(esc);
     client.print(F("'>"));
-    client.print(F(esc));
-    Client.print(F("</option>"));
+    client.print(esc);
+    client.print(F("</option>"));
   }
   client.print(F(
     "</select><br><br>"
@@ -160,4 +90,86 @@ void sendStatus(WiFiClient &client, bool &successful) {
 
   if (successful) client.print("{ \"valid\":\"true\" }");
   else client.print("{ \"valid\":\"false\" }");
+}
+
+void handleSoftAP(WiFiServer &server, String (&ssid_list)[MAX_SSIDS], HTTPRequest &http_req, Preferences &prefs) {
+  WiFiClient client = server.available();
+  if (!client) return;
+
+  bool in_headers = true;
+  unsigned long st = millis();
+  while (client.connected() && millis() - st < 1000) {
+    if (!client.available()) continue;
+
+    // first parse the method, path etc.
+    // and then the data(must be json)
+    // then try to connect, depending on whether it works or not, then just send back a "successful" or "unsuccessful" message.
+
+    String line = client.readStringUntil('\n');
+
+    if (in_headers) {
+      if (line.startsWith("GET")) {
+        http_req.method = "get";
+
+        // length of 'GET ' is 4.
+        line.substring(4, line.indexOf(" ")).trim();
+        http_req.uri = line;
+      } else if (line.startsWith("POST")) {
+        http_req.method = "post";
+
+        // length of 'POST ' is 5.
+        line.substring(5, line.indexOf(" ")).trim();
+        http_req.uri = line;
+      }
+
+      else if (line.startsWith("Content-Type")) {
+        line.substring(strlen("Content-Type: ")).trim();
+        http_req.content_type = line;
+      } else if (line.startsWith("Content-Length")) {
+        line.substring(strlen("Content-Length: ")).trim();
+        http_req.content_length = line.toInt();
+      }
+
+      else if (line == "\r") {  // if just an empty line(\r\n)
+        in_headers = false;
+        break;
+      }
+    }
+  }
+
+  if (http_req.method == "get" && http_req.uri == "/") {
+    sendPage(client, ssid_list);
+  }
+
+  if (http_req.method == "post" && http_req.uri == "/wifi" && http_req.content_length > 0) {
+    // wait for all of the body.
+    unsigned long bt = millis();
+    while (client.connected() && client.available() < http_req.content_length && millis() - bt < 2000) {
+      delay(1);
+    }
+
+
+    http_req.body.reserve(http_req.content_length);
+
+    while ((int)http_req.body.length() < http_req.content_length && client.connected()) {
+      if (client.available()) {
+        http_req.body += (char)client.read();
+      }
+    }
+
+    WiFiCredentials wifi_credentials;
+    bool if_valid_credentials = parsePostData(http_req, wifi_credentials);
+
+    sendStatus(client, if_valid_credentials);
+
+    if (if_valid_credentials) {
+      prefs.begin("wifi", true);
+      prefs.putString("ssid", wifi_credentials.ssid);
+      prefs.putString("password", wifi_credentials.password);
+      prefs.end();
+      ESP.restart();  // restart to enter the pairing mode.
+    }
+  }
+
+  client.stop();
 }
