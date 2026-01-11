@@ -10,4 +10,4 @@
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
 <Appheader title="Web Arayüzü" />
 
-<main class="bg-surface-50 p-4 min-h-screen">{@render children()}</main>
+<main class="bg-surface-50 p-4 min-h-screen mb-12">{@render children()}</main>

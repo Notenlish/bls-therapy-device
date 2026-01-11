@@ -71,10 +71,12 @@
     Latest received: {JSON.stringify(latestReceived)}
   </p>
 
+  {#if curmode == "therapy"}
   <Controllergrid>
     <Basiccontroller {motorPower} {setMotorPower}></Basiccontroller>
     <BallController></BallController>
   </Controllergrid>
+  {/if}
 
   <div class="control-grid">
     <div class="controller">
