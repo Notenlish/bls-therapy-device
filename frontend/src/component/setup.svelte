@@ -1,6 +1,42 @@
-<script lang="ts"></script>
+<script lang="ts">
+  let curStep = $state(0);
 
-<p>Cihazınızın kurulumunu aşağıdaki yönergeyi okuyarak yapabilirsiniz:</p>
+  const steps: {
+    text: string;
+    imgPath: string;
+    imgAlt: string;
+    requireStep?: boolean;
+  }[] = [
+    {
+      text: "Yeni aldığınız cihazı kutusundan çıkarın",
+      imgPath: "",
+      imgAlt: "",
+    },
+    {
+      text: "Cihazın arkasındaki QR kodu okutun:",
+      requireStep: true,
+      imgPath: "",
+      imgAlt: "",
+    },
+  ];
+  let curStepData = $derived(steps[curStep]);
+</script>
+
+<p>Cihazınızın kurulumunu aşağıdaki adımları takip ederek yapabilirsiniz:</p>
+
+<div class="card my-4 preset-filled-surface-100-900 p-4 w-full text-center">
+  <div class="flex flex-col items-center gap-2">
+    <div
+      class="relative text-2xl rounded-full aspect-square h-8 grid place-content-center"
+    >
+      <h1 class="-translate-y-0.5 w-max">
+        <span class="text-surface-950">Adım {curStep}</span>
+      </h1>
+    </div>
+    <p>{curStepData.text}</p>
+  </div>
+  <img class="w-full min-h-24 border" src={curStepData.imgPath} alt={curStepData.imgAlt} />
+</div>
 
 <ol class="list-decimal ml-4">
   <li>Yeni aldığınız cihazı kutusundan çıkarın</li>
