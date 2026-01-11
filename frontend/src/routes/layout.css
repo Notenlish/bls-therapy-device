@@ -10,5 +10,6 @@
 /* @import '@skeletonlabs/skeleton/themes/mint';  */
 
 /* theme name should be either mint or pine*/
+@import './grassTheme.css';
 
 @custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));

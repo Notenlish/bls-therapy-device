@@ -6,7 +6,7 @@
   let props = $props();
 </script>
 
-<AppBar class="bg-surface-100 bottom-2 border-b-1 border-surface-400">
+<AppBar class="bg-surface-50 bottom-2 border-b-1 border-surface-400">
   <AppBar.Toolbar class="grid-cols-[auto_1fr_auto]">
     <AppBar.Lead>
       <button type="button" class="btn-icon btn-icon-lg hover:preset-tonal"><MenuIcon /></button>

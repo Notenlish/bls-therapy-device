@@ -7,7 +7,11 @@
     motorPower = e[0];
   };
 
+  let curmode: string | "setup" | "pair" | "therapy" = $state("setup");
+
   import BallController from "../component/ballcontroller.svelte";
+  import Modeswitcher from "../component/modeswitcher.svelte";
+  import Setup from "../component/setup.svelte";
 
   import { onMount } from "svelte";
   import Controllergrid from "../component/controllergrid.svelte";
@@ -48,6 +52,15 @@
 </script>
 
 <div>
+  <Modeswitcher
+    setMode={(s: string) => {
+      curmode = s;
+    }}
+    curMode={curmode}
+  />
+  {#if curmode == "setup"}
+    <Setup />
+  {/if}
   <p>esp32c3'ü kontrol etmek için olan bir test arayüzü.</p>
 
   <p>
@@ -105,69 +118,3 @@
     </div>
   </div>
 </div>
-
-<style>
-  /* :global(.roboto-font) {
-    font-family: "Roboto", sans-serif;
-    font-optical-sizing: auto;
-    font-style: normal;
-    font-variation-settings: "wdth" 100;
-  }
-  :global(body) {
-    margin: 0;
-    padding: 0;
-  }
-  :global(main) {
-    margin-inline: 1rem;
-  }
-  header {
-    padding: 1rem;
-    margin: 0;
-    background-color: rgb(151, 184, 246);
-    color: rgba(26, 26, 255);
-  }
-  p {
-    font-size: 18px;
-  }
-  header h1 {
-    padding: 0;
-    margin: 0;
-  }
-  form {
-    padding: 0.5rem;
-    margin-block: 0.5rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
-  }
-  :global(button) {
-    border-radius: 3px;
-    padding: 0.8rem 1.6rem;
-    border: none;
-    background-color: rgb(51, 109, 234);
-    color: white;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-  }
-  :global(button:hover) {
-    background-color: rgb(41, 98, 221);
-  }
-
-  .control-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .controller {
-    margin: 1rem;
-    padding: 1rem;
-    border: solid 2px rgb(31, 81, 209);
-    border-radius: 4px;
-  }
-  .controller h2 {
-    margin: 0;
-    font-weight: 500;
-    font-size: 1.4rem;
-  } */
-</style>
