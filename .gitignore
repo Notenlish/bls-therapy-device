@@ -1,4 +1,5 @@
 device_code/secrets.h
+certs/
 
 # Prerequisites
 *.d

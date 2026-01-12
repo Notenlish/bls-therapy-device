@@ -56,35 +56,33 @@
 <div
   class="card my-4 preset-filled-surface-100-900 p-4 w-full text-center flex flex-col items-center"
 >
-  <div class="flex flex-col items-center gap-2">
-    <div
-      class="relative text-2xl rounded-full aspect-square h-8 grid place-content-center"
-    >
-      <h1 class="-translate-y-0.5 w-max font-semibold">
-        <span class="text-surface-950">Adım {curStep + 1}</span>
-      </h1>
-    </div>
-    <p>{curStepData.text}</p>
+  <div
+    class="relative text-2xl rounded-full aspect-square h-8 grid place-content-center"
+  >
+    <h1 class="-translate-y-0.5 w-max font-semibold">
+      <span class="text-surface-950">Adım {curStep + 1}</span>
+    </h1>
   </div>
-  <br />
   <img
     class="w-full min-h-36 border"
     src={curStepData.imgPath}
     alt={curStepData.imgAlt}
   />
+  <br />
+  <p>{curStepData.text}</p>
   {#if curStepData.id == "readQR"}
-    <div class="qr-grass-theme"><video bind:this={videoElm}></video></div>
+    <div class="qr-grass-theme">
+      <video playsinline muted autoplay bind:this={videoElm}></video>
+    </div>
     <!-- If I'm going to be using skeleton ui kit I should actually be using the components it provides lol. -->
     <button
       onclick={() => {
         if (navigator.mediaDevices.getUserMedia) {
           navigator.mediaDevices
-            .getUserMedia({ video: true })
+            .getUserMedia({ video: { facingMode: { ideal: "environment" } } })
             .then((stream) => {
               videoElm.srcObject = stream;
               videoElm.play();
-              videoElm.muted = true;
-              videoElm.playsInline = true;
 
               qrScanner = new QrScanner(
                 videoElm,
