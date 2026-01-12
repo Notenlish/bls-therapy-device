@@ -18,6 +18,13 @@ NOTE2: Brave wont work, use chrome(chromium) with no adblocker to be sure it wor
 the same applies to localhost, you need to go to https://localhost:5173 not http://localhost:5173.
 
 
+## I cant flash / get serial output etc.
+- enable usb cdc on boot
+- check your ports(change if necessary)
+- check if you selected the right board(esp32c3)
+- install the usb serial driver (forgot what its called)
+- use different esp32c3
+- use a simple sketch to see whats problematic etc.
 
 
 getting local network ip:

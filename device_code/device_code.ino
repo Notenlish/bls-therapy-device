@@ -53,6 +53,8 @@ String ssid_list[MAX_SSIDS];
 void setup() {
   pinMode(LED_PIN, OUTPUT);
   Serial.begin(115200);
+  delay(2000);
+  Serial.println("PLEASE work");
 
   reserveSsidList(ssid_list);
 
@@ -83,6 +85,7 @@ void setup() {
       }
 
       server.begin();
+      Serial.println("Started the server at port 80");
       return;
     } else {
       Serial.println("Could not create softAP :(");
@@ -172,7 +175,7 @@ void loop() {
 
 //     /* check if it has surpassed the bouncing area
 //      * this automatically "bounces" the ball_pos in case it goes beyond what its supposed to go to
-//      * like if ball_pos goes to negatives, it will move it in the opposite direction to keep it in range 
+//      * like if ball_pos goes to negatives, it will move it in the opposite direction to keep it in range
 //      */
 //     checkSurpassedArea();
 

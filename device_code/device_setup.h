@@ -94,32 +94,41 @@ void sendStatus(WiFiClient &client, bool &successful) {
 
 void handleSoftAP(WiFiServer &server, String (&ssid_list)[MAX_SSIDS], HTTPRequest &http_req, Preferences &prefs) {
   WiFiClient client = server.available();
+  Serial.print("loop client: ");
+  Serial.println(client);  // client is 0?
   if (!client) return;
+  Serial.println(".");  // code cant come here
+
 
   bool in_headers = true;
   unsigned long st = millis();
   while (client.connected() && millis() - st < 1000) {
     if (!client.available()) continue;
+    Serial.println("gonna parse headers");
+
 
     // first parse the method, path etc.
     // and then the data(must be json)
     // then try to connect, depending on whether it works or not, then just send back a "successful" or "unsuccessful" message.
 
     String line = client.readStringUntil('\n');
+    Serial.print("read line:");
+    Serial.print(line);
+
 
     if (in_headers) {
       if (line.startsWith("GET")) {
         http_req.method = "get";
 
         // length of 'GET ' is 4.
-        line.substring(4, line.indexOf(" ")).trim();
-        http_req.uri = line;
+        http_req.uri = line.substring(4, line.indexOf(" "));
+        http_req.uri.trim();
       } else if (line.startsWith("POST")) {
         http_req.method = "post";
 
         // length of 'POST ' is 5.
-        line.substring(5, line.indexOf(" ")).trim();
-        http_req.uri = line;
+        http_req.uri = line.substring(5, line.indexOf(" "));
+        http_req.uri.trim();
       }
 
       else if (line.startsWith("Content-Type")) {
@@ -172,4 +181,6 @@ void handleSoftAP(WiFiServer &server, String (&ssid_list)[MAX_SSIDS], HTTPReques
   }
 
   client.stop();
+
+  Serial.println("I hate you esp32");
 }
