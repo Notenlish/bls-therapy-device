@@ -2,10 +2,19 @@
   import QrScanner from "qr-scanner";
 
   import { VideoIcon } from "@lucide/svelte";
+  import Qrenterwifidialog from "./qrenterwifidialog.svelte";
 
   let curStep = $state(0);
   let videoElm: HTMLVideoElement = $state();
-  let qrScanner;
+  let qrScanner: QrScanner | undefined = $state();
+  let extractedQrData: string | object = $state("");
+
+  const goToNextStep = () => {
+    curStep += 1;
+  };
+  const goToPreviousStep = () => {
+    curStep -= 1;
+  };
 
   const steps: {
     text: string;
@@ -16,7 +25,7 @@
   }[] = [
     {
       text: "Yeni aldığınız cihazı kutusundan çıkarın",
-      imgPath: "",
+      imgPath: "/setup-steps/0.png",
       imgAlt: "",
     },
     {
@@ -26,18 +35,18 @@
       imgAlt: "",
       id: "readQR",
     },
+    {
+      text: "WiFi'ye bağlandığınız zaman telefonunuz ağda doğrulanmanız için giriş yapmanızı isteyecek. Açılan sayfada kullandığınız iş veya ev wifi'sinin adını ve şifresini girin. Bu şekilde terapi cihazı sizin ağınıza bağlanacak ve cihazınızı kullanabileceksiniz.",
+      requireStep: true,
+      imgPath: "",
+      imgAlt: "",
+      id: "openForm",
+    },
   ];
 
   let curStepData = $derived(steps[curStep]);
   $effect(() => {
-    if (curStepData.id == "readQR") {
-      qrScanner = new QrScanner(
-        videoElm,
-        (result) => console.log("decoded qr code:", result),
-        {
-          /* your options or returnDetailedScanResult: true if you're not specifying any other options */
-        }
-      );
+    if (curStepData.id == "readQR" && extractedQrData) {
     }
   });
 </script>
@@ -52,18 +61,19 @@
       class="relative text-2xl rounded-full aspect-square h-8 grid place-content-center"
     >
       <h1 class="-translate-y-0.5 w-max font-semibold">
-        <span class="text-surface-950">Adım {curStep}</span>
+        <span class="text-surface-950">Adım {curStep + 1}</span>
       </h1>
     </div>
     <p>{curStepData.text}</p>
   </div>
+  <br />
   <img
-    class="w-full min-h-24 border"
+    class="w-full min-h-36 border"
     src={curStepData.imgPath}
     alt={curStepData.imgAlt}
   />
   {#if curStepData.id == "readQR"}
-    <video bind:this={videoElm}></video>
+    <div class="qr-grass-theme"><video bind:this={videoElm}></video></div>
     <!-- If I'm going to be using skeleton ui kit I should actually be using the components it provides lol. -->
     <button
       onclick={() => {
@@ -75,6 +85,21 @@
               videoElm.play();
               videoElm.muted = true;
               videoElm.playsInline = true;
+
+              qrScanner = new QrScanner(
+                videoElm,
+                (result) => {
+                  console.log(result);
+                  extractedQrData = JSON.parse(result.data);
+                  qrScanner?.stop();
+                },
+                {
+                  highlightScanRegion: true,
+                  /* your options or returnDetailedScanResult: true if you're not specifying any other options */
+                }
+              );
+              qrScanner.start();
+              console.log("qrscanner", qrScanner);
             })
             .catch((error) => {
               console.error("Something went wrong!", error);
@@ -87,24 +112,31 @@
       type="button"><VideoIcon></VideoIcon>Start Camera</button
     >
     <br />
-    VEYA
+    <b>VEYA</b>
     <br />
-    WiFi
+    <span>SetupTherapyDevice-[Cihaz No]</span> adlı WiFi'ye bağlanın.
+    <br />
+    {#if extractedQrData != ""}
+      <Qrenterwifidialog onSuccessful={goToNextStep} data={extractedQrData} />
+    {/if}
+  {/if}
+  {#if curStepData.id == "openForm"}
+    <br />
+    <p>WiFi adını ve şifresini girdikten sonra sonraki adıma geçebilirsiniz.</p>
   {/if}
 
+  <br />
   <div class="grid grid-cols-2 gap-2">
     <button
       class="text-md py-2 px-4 rounded bg-primary-500 text-surface-50"
-      onclick={() => {
-        curStep -= 1;
-      }}
+      onclick={goToPreviousStep}
+      disabled={curStep == 0 ? true : false}
       type="button">Geri</button
     >
     <button
       class="text-md py-2 px-4 rounded bg-primary-500 text-surface-50"
-      onclick={() => {
-        curStep += 1;
-      }}
+      onclick={goToNextStep}
+      disabled={curStep == steps.length - 1 ? true : false}
       type="button">İleri</button
     >
   </div>

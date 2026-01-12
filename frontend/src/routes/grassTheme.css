@@ -203,3 +203,11 @@
 	--color-surface-contrast-900: var(--color-surface-contrast-light);
 	--color-surface-contrast-950: var(--color-surface-contrast-light);
 }
+
+/* QR Code stuff*/
+.qr-grass-theme .scan-region-highlight-svg,
+    .qr-grass-theme .code-outline-highlight {
+        stroke: oklch(0.4496 0.1 145.59) !important;
+		animation: none !important;
+  transform: none !important;
+    }
