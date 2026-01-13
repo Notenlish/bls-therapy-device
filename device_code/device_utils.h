@@ -6,14 +6,15 @@ String htmlEscape(const String &s) {
   for (unsigned int i = 0; i < s.length(); i++) {
     char c = s[i];
     switch (c) {
-      // These are the only characters I need to escape, I think.
       case '\"': out += F("&quot;"); break;
-      case '&': out += F("&#38;"); break;
+      case '&': out += F("&amp;"); break;
       case '\'': out += F("&#39;"); break;
       case '<': out += F("&lt;"); break;
       case '>': out += F("&gt;"); break;
+      default: out += c; break;  // do NOT use F() on dynamic stuff, only static strings.
     }
   }
+  return out;
 }
 
 Color statusLedColor(TherapyDevice::DeviceMode mode) {

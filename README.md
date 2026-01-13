@@ -26,6 +26,13 @@ the same applies to localhost, you need to go to https://localhost:5173 not http
 - use different esp32c3
 - use a simple sketch to see whats problematic etc.
 
+## Arduino IDE Warning
+File -> Preferences -> Compiler Warnings: Set it to `all`.
+
+Also enable verbose output during compilation if you want.
+
+If you want some debug info during runtime go to tools -> Core debug level: Set it to any level you want.
+
 
 getting local network ip:
 use `ipconfig` to get ip address on windows(ipv4 address)

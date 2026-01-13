@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef DEVICE_ID
   #define DEVICE_ID 0
 #endif
@@ -14,7 +12,7 @@
   #endif
 #endif
 
-#define MAX_SSIDS 128
+#define MAX_SSIDS 16
 #define LED_PIN 4
 
 #if DEVMODE

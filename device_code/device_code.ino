@@ -19,7 +19,7 @@ Preferences prefs;
 TherapyDevice::DeviceMode device_mode = TherapyDevice::DeviceMode::Setup;
 TherapyDevice::MotorState motor_state = TherapyDevice::MotorState::Active;
 
-WiFiClient client;  // or use NetworkClient?
+// WiFiClient client;  // or use NetworkClient?
 
 
 
@@ -58,8 +58,7 @@ void setup() {
 
   reserveSsidList(ssid_list);
 
-  // TODO: I forgot to do the actual thing, which is giving the webpage the ability to send over the wifi credentials. im dumb .d
-  prefs.begin("wifi", true);
+  prefs.begin("wifi");  // Readonly mode
   WiFiCredentials saved_credentials(prefs.getString("ssid", ""), prefs.getString("password", ""));
   prefs.end();
 
@@ -102,9 +101,8 @@ void setup() {
 }
 
 void loop() {
-  HTTPRequest http_req;
   if (device_mode == TherapyDevice::DeviceMode::Setup) {
-    handleSoftAP(server, ssid_list, http_req, prefs);
+    handleSoftAP(server, ssid_list, prefs);
   }
   // handleNetworkTask();
   // handleMotorStuff();
