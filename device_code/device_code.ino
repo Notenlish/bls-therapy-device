@@ -13,14 +13,12 @@
 
 
 // TODO: Go check esp32c3 mini pinouts to see what pins should be used for status led.
+// TODO: the form on setup mode doesnt correctly respond back. It should send back a page that says "successful" or "not successful" on it.
 
 Preferences prefs;
 
 TherapyDevice::DeviceMode device_mode = TherapyDevice::DeviceMode::Setup;
 TherapyDevice::MotorState motor_state = TherapyDevice::MotorState::Active;
-
-// WiFiClient client;  // or use NetworkClient?
-
 
 
 
@@ -91,10 +89,13 @@ void setup() {
       ESP.restart();
     }
   } else {  // has saved credentials
+    Serial.println("Have saved credentials, will attempt to connect.");
     bool connected = attemptWifiConnection(saved_credentials);
     if (connected) {
-      enterPairingMode(prefs);
+      Serial.println("Connected to wifi, allowing connection from web app(pairing)");
+      enterPairingMode(prefs,device_mode);
     } else {
+      Serial.println("Could not connect to wifi, entering setup mode again.");
       enterSetupMode(prefs);
     }
   }
@@ -103,6 +104,10 @@ void setup() {
 void loop() {
   if (device_mode == TherapyDevice::DeviceMode::Setup) {
     handleSoftAP(server, ssid_list, prefs);
+  }
+  if (device_mode == TherapyDevice::DeviceMode::Pairing) {
+    // handlePairing();
+    delay(1);
   }
   // handleNetworkTask();
   // handleMotorStuff();

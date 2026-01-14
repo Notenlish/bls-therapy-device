@@ -20,13 +20,19 @@ bool parsePostData(HTTPRequest &http_req, WiFiCredentials &wifi_credentials) {
   Serial.print("JSON.typeof(obj): ");
   Serial.println(JSON.typeof(obj));
 
+  // Serial.print("has ssid: ");
+  // Serial.println(obj.hasOwnProperty("ssid"));
+
+  // Serial.print("has password: ");
+  // Serial.println(obj.hasOwnProperty("password"));
+
   if (!obj.hasOwnProperty("ssid") || !obj.hasOwnProperty("password")) {
     Serial.println("ssid / password missing.");
     return false;
   }
 
-  if (obj.hasOwnProperty("customssid")) {
-    obj["ssid"] = (String)obj["customssid"];
+  if (obj.hasOwnProperty("ssid_custom")) {
+    obj["ssid"] = (String)obj["ssid_custom"];
   }
 
   wifi_credentials.ssid = (String)obj["ssid"];
@@ -43,16 +49,17 @@ void sendPage(WiFiClient &client, String (&ssid_list)[MAX_SSIDS]) {
                  "\r\n"));
 
   // HTML Body
-  client.print(
-      F("<!doctype html><html><head>"
-        "<meta name='viewport' content='width=device-width, initial-scale=1'>"
-        "<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
-        "<title>WiFi Setup</title>"
-        "</head><body>"
-        "<h1>Select WiFi</h1>"
-        "<form method='POST' action='/save'>"
-        "<label for='ssid'>WiFi Adı (SSID):</label><br>"
-        "<select id='ssid' name='ssid'>"));
+  client.print(F(
+      "<!doctype html><html><head>"
+      "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
+      "<meta name=\"viewport\" content=\"width=device-width, "
+      "initial-scale=1.0\">"
+      "<title>WiFi Setup</title>"
+      "</head><body>"
+      "<h1>Select WiFi</h1>"
+      "<form id=\"postForm\" method=\"POST\" action=\"/save\">"
+      "<label for=\"ssid\">WiFi Adı (SSID):</label>"
+      "<select id=\"ssid\" name=\"ssid\">"));
 
   // Serial.printf("ssid_list base=%p sizeof(String)=%u MAX_SSIDS=%u\n",
   //               (void *)ssid_list, (unsigned)sizeof(String),
@@ -73,60 +80,104 @@ void sendPage(WiFiClient &client, String (&ssid_list)[MAX_SSIDS]) {
     client.print(esc);
     client.print(F("</option>"));
   }
-  client.print(F("</select><br>"
-                 "<label for=\"pass\">Password</label><br>"
-                 "<input id='pass' name='pass' type='password' "  // todo instaed of ' use \"
-                 "autocomplete='off'><br>"));
+  client.print(F("</select><br>"));
+
+  // custom ssid
+  client.print(F("<label for=\"ssid_custom\">WiFi Adı(SSID) Özel:</label>"
+                 "<input placeholder=\"Seçeneklerde Ağ Adınızı bulamazsanız "
+                 "buradan girin.\" "
+                 "type=\"text\" /><br>"));
+
+  client.print(F("<label for=\"pass\">Şifre:</label>"
+                 "<div class=\"password-container\">"
+                 "<input id=\"password\" name=\"password\" maxlength=\"63\" "
+                 "type=\"password\" autocomplete=\"off\" >"
+                 "<button id=\"passBtn\" type=\"button\" "
+                 "onclick=\"togglePass()\" >Göster</button>"
+                 "</div>"
+                 "<br>"));
 
   Serial.println("Finished sending the ssids.");
-  // custom ssid
-  client.print(F("<br><label for='ssid_custom'>SSID custom</label><br>"
-                 "<input placeholder='Enter SSID here if you cant find it in "
-                 "the options.' type='text' />"));
 
-  client.print(F("<br>"
-                 "<button type='submit'>Save</button>"
-                 "</form>"
-                 "<style>"
-                 "body {"
-                 "padding: 1rem;"
-                 "background-color: oklch(0.9728 0.01 172.21);"
-                 "border-radius: 1rem;"
-                 "}"
-                 "h1 {"
-                 "color: oklch(0.4835 0.06 171.15);"
-                 "width:100%;"
-                 "text-align:center;"
-                 "}"
-                 "form {"
-                 "padding-block: 1rem;"
-                 "display: flex;"
-                 "flex-direction: column;"
-                 "align-items: center;"
-                 "}"
-                 "label {"
-                 "color: oklch(0.4835 0.06 171.15);"
-                 "font-size: 0.85rem;"
-                 "}"
-                 "select {"
-                 "border: oklch(0.4496 0.1 145.59) solid 1px;"
-                 "padding: 0.5rem 0.25rem;"
-                 "border-radius: 2px;"
-                 "}"
-                 "input {"
-                 "border: oklch(0.4496 0.1 145.59) solid 1px;"
-                 "border-radius: 2px;"
-                 "padding: 0.5rem 0.25rem;"
-                 "}"
-                 "button {"
-                 "padding: 0.5rem 1rem;"
-                 "border-radius: 0.25rem;"
-                 "font-size: 0.9rem;"
-                 "background-color: oklch(0.4496 0.1 145.59);"
-                 "color: white;"
-                 "}"
-                 "</style>"
-                 "</body></html>"));
+  client.print(
+      F("<br>"
+        "<button type=\"submit\">Kaydet</button>"
+        "</form>"
+        "<style>"
+        "body {"
+        "padding: 1rem;"
+        "background-color: oklch(0.9728 0.01 172.21);"
+        "border-radius: 1rem;"
+        "}"
+        "h1 {"
+        "color: oklch(0.4835 0.06 171.15);"
+        "width:100%;"
+        "text-align:center;"
+        "}"
+        "form {"
+        "padding-block: 1rem;"
+        "display: flex;"
+        "flex-direction: column;"
+        "align-items: center;"
+        "}"
+        "label {"
+        "color: oklch(0.4835 0.06 171.15);"
+        "font-size: 0.85rem;"
+        "}"
+        "select {"
+        "border: oklch(0.4496 0.1 145.59) solid 1px;"
+        "padding: 0.5rem 0.25rem;"
+        "border-radius: 2px;"
+        "background-color: white;"
+        "}"
+        "input {"
+        "background-color: white;"
+        "border: oklch(0.4496 0.1 145.59) solid 1px;"
+        "border-radius: 2px;"
+        "padding: 0.5rem 0.25rem;"
+        "min-width: max(60vw, 4rem);"
+        "}"
+        "button {"
+        "box-shadow: none;"
+        "outline: none;"
+        "padding: 0.5rem 1rem;"
+        "border-radius: 0.25rem;"
+        "font-size: 0.9rem;"
+        "background-color: oklch(0.4496 0.1 145.59);"
+        "color: white;"
+        "}"
+        ".password-container {"
+        "display: flex;"
+        "gap: 0.5rem;"
+        "align-items:center;"
+        "}"
+        "</style>"
+        "<script>"
+        "const form = document.getElementById(\"postForm\");"
+        ""
+        "async function sendData() {"
+        "const formData = new FormData(form);"
+        "const formJsonData = JSON.stringify(Object.fromEntries(formData));"
+        "try {"
+        "const response = await fetch(\"http://192.168.4.1/save\", {"
+        "method:  \"POST\", body: formJsonData });"
+        "alert(await response.json());"
+        "} catch (e) {"
+        "alert(e);"
+        "}"
+        "}"
+        ""
+        "form.addEventListener(\"submit\", (event) => { "
+        "event.preventDefault(); sendData(); });"
+        ""
+        "function togglePass(){"
+        "let p=document.getElementById('pass');"
+        "let b=document.getElementById('passBtn');"
+        "if(p.type==='password'){p.type='text';b.textContent='Gizle';}"
+        "else{p.type='password';b.textContent='Göster';}"
+        "}"
+        "</script>"
+        "</body></html>"));
   Serial.println("Finished sending the whole page.");
 }
 
@@ -173,7 +224,7 @@ void handleSoftAP(WiFiServer &server, String (&ssid_list)[MAX_SSIDS],
     // then try to connect, depending on whether it works or not, then just send
     // back a "successful" or "unsuccessful" message.
 
-    String line = client.readStringUntil('\n');
+    String line = client.readStringUntil('\n'); // "" --> String, '' --> char
     Serial.print("read line:  ");
     Serial.println(line);
 
@@ -229,7 +280,7 @@ void handleSoftAP(WiFiServer &server, String (&ssid_list)[MAX_SSIDS],
     sendPage(client, ssid_list);
   }
 
-  if (http_req.method == "post" && http_req.uri == "/wifi" &&
+  if (http_req.method == "post" && http_req.uri == "/save" &&
       http_req.content_length > 0) {
     Serial.println("got POST request, waiting for data...");
 
@@ -251,6 +302,12 @@ void handleSoftAP(WiFiServer &server, String (&ssid_list)[MAX_SSIDS],
 
     WiFiCredentials wifi_credentials;
     bool if_valid_credentials = parsePostData(http_req, wifi_credentials);
+    Serial.print("wifi credentials received:\n");
+    Serial.print("ssid: ");
+    Serial.print(wifi_credentials.ssid);
+    Serial.print("  -  password: ");
+    Serial.println(wifi_credentials.password);
+
 
     Serial.print("is wifi credentials valid: ");
     Serial.println(if_valid_credentials);

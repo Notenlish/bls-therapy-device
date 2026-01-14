@@ -1,3 +1,4 @@
+#include "device_types.h"
 #pragma once
 
 String htmlEscape(const String &s) {
@@ -34,7 +35,7 @@ Color statusLedColor(TherapyDevice::DeviceMode mode) {
 
 void enterSetupMode(Preferences &prefs) {
   Serial.println("Entering setup mode.");
-  prefs.begin("wifi", false);
+  prefs.begin("wifi", false);  // false --> Read-Write mode
   prefs.putString("ssid", "");
   prefs.putString("password", "");
   prefs.end();
@@ -42,7 +43,8 @@ void enterSetupMode(Preferences &prefs) {
   ESP.restart();
 }
 
-void enterPairingMode(Preferences &prefs) {
+void enterPairingMode(Preferences &prefs, TherapyDevice::DeviceMode &device_mode) {
+  device_mode = TherapyDevice::DeviceMode::Pairing;
   // TODO: status led must be lighting green.
   // TODO: actually write this.
 }
