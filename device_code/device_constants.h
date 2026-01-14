@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef DEVICE_ID
   #define DEVICE_ID 0
 #endif

@@ -36,8 +36,6 @@ bool parsePostData(HTTPRequest &http_req, WiFiCredentials &wifi_credentials) {
 
 void sendPage(WiFiClient &client, String (&ssid_list)[MAX_SSIDS]) {
   // F() is used to make these texts stay in flash and not be copied to ram.
-
-  Serial.println("Starting to send page.");
   // HTTP response headers
   client.print(F("HTTP/1.1 200 OK\r\n"
                  "Content-Type: text/html; charset=utf-8\r\n"
@@ -48,43 +46,37 @@ void sendPage(WiFiClient &client, String (&ssid_list)[MAX_SSIDS]) {
   client.print(
       F("<!doctype html><html><head>"
         "<meta name='viewport' content='width=device-width, initial-scale=1'>"
+        "<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
         "<title>WiFi Setup</title>"
         "</head><body>"
         "<h1>Select WiFi</h1>"
         "<form method='POST' action='/save'>"
-        "<label for='ssid'>SSID</label><br>"
+        "<label for='ssid'>WiFi Adı (SSID):</label><br>"
         "<select id='ssid' name='ssid'>"));
 
-  Serial.println("Adding the saved ssid list:");
-
-  Serial.printf("ssid_list base=%p sizeof(String)=%u MAX_SSIDS=%u\n",
-                (void *)ssid_list, (unsigned)sizeof(String),
-                (unsigned)MAX_SSIDS);
+  // Serial.printf("ssid_list base=%p sizeof(String)=%u MAX_SSIDS=%u\n",
+  //               (void *)ssid_list, (unsigned)sizeof(String),
+  //               (unsigned)MAX_SSIDS);
   // a bunch of <option> tags
   for (int i = 0; i < MAX_SSIDS; i++) {
-    heap_caps_check_integrity_all(true); // catch corruption early
-    Serial.print("sending ssid id: ");
-    Serial.println(i);
-
+    // heap_caps_check_integrity_all(true); // catch corruption early
     if (ssid_list[i].length() == 0)
       continue;
 
-    Serial.println("gonna escape some ssid name");
-
     String esc = htmlEscape(ssid_list[i]);
-    Serial.print("Something something escaped html: ");
-    Serial.println(esc);
+    // Serial.print("Something something escaped html: ");
+    // Serial.println(esc);
 
-    client.print(F("<option value='"));
+    client.print(F("<option value=\""));
     client.print(esc);
-    client.print(F("'>"));
+    client.print(F("\">"));
     client.print(esc);
     client.print(F("</option>"));
   }
-  client.print(F("</select><br><br>"
-                 "<label for='pass'>Password</label><br>"
-                 "<input id='pass' name='pass' type='password' "
-                 "autocomplete='off'><br><br>"));
+  client.print(F("</select><br>"
+                 "<label for=\"pass\">Password</label><br>"
+                 "<input id='pass' name='pass' type='password' "  // todo instaed of ' use \"
+                 "autocomplete='off'><br>"));
 
   Serial.println("Finished sending the ssids.");
   // custom ssid
@@ -92,8 +84,48 @@ void sendPage(WiFiClient &client, String (&ssid_list)[MAX_SSIDS]) {
                  "<input placeholder='Enter SSID here if you cant find it in "
                  "the options.' type='text' />"));
 
-  client.print(F("<button type='submit'>Save</button>"
+  client.print(F("<br>"
+                 "<button type='submit'>Save</button>"
                  "</form>"
+                 "<style>"
+                 "body {"
+                 "padding: 1rem;"
+                 "background-color: oklch(0.9728 0.01 172.21);"
+                 "border-radius: 1rem;"
+                 "}"
+                 "h1 {"
+                 "color: oklch(0.4835 0.06 171.15);"
+                 "width:100%;"
+                 "text-align:center;"
+                 "}"
+                 "form {"
+                 "padding-block: 1rem;"
+                 "display: flex;"
+                 "flex-direction: column;"
+                 "align-items: center;"
+                 "}"
+                 "label {"
+                 "color: oklch(0.4835 0.06 171.15);"
+                 "font-size: 0.85rem;"
+                 "}"
+                 "select {"
+                 "border: oklch(0.4496 0.1 145.59) solid 1px;"
+                 "padding: 0.5rem 0.25rem;"
+                 "border-radius: 2px;"
+                 "}"
+                 "input {"
+                 "border: oklch(0.4496 0.1 145.59) solid 1px;"
+                 "border-radius: 2px;"
+                 "padding: 0.5rem 0.25rem;"
+                 "}"
+                 "button {"
+                 "padding: 0.5rem 1rem;"
+                 "border-radius: 0.25rem;"
+                 "font-size: 0.9rem;"
+                 "background-color: oklch(0.4496 0.1 145.59);"
+                 "color: white;"
+                 "}"
+                 "</style>"
                  "</body></html>"));
   Serial.println("Finished sending the whole page.");
 }
