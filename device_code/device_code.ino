@@ -16,6 +16,8 @@
 
 // TODO: Go check esp32c3 mini pinouts to see what pins should be used for status led.
 // TODO: the form on setup mode doesnt correctly respond back. It should send back a page that says "successful" or "not successful" on it.
+// TODO: add a button on the web ui to erase all wifi data(so that the new wifi details can be setup again).
+//   (aka allow the user to remove everything in the NVS)
 
 Preferences prefs;
 
