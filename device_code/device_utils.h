@@ -33,22 +33,6 @@ Color statusLedColor(TherapyDevice::DeviceMode mode) {
   }
 }
 
-void enterSetupMode(Preferences &prefs) {
-  Serial.println("Entering setup mode.");
-  prefs.begin("wifi", false);  // false --> Read-Write mode
-  prefs.putString("ssid", "");
-  prefs.putString("password", "");
-  prefs.end();
-
-  ESP.restart();
-}
-
-void enterPairingMode(Preferences &prefs, TherapyDevice::DeviceMode &device_mode) {
-  device_mode = TherapyDevice::DeviceMode::Pairing;
-  // TODO: status led must be lighting green.
-  // TODO: actually write this.
-}
-
 void reserveSsidList(String ssid_list[MAX_SSIDS]) {
   for (int i = 0; i < MAX_SSIDS; i++) {
     ssid_list[i].reserve(32 + 1);

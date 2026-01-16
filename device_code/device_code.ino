@@ -9,7 +9,9 @@
 
 #include <device_utils.h>
 #include <device_setup.h>
+#include <device_pair.h>
 
+#include <ESPmDNS.h>
 
 
 // TODO: Go check esp32c3 mini pinouts to see what pins should be used for status led.
@@ -61,6 +63,7 @@ void setup() {
   prefs.end();
 
   if (saved_credentials.ssid.length() == 0) {
+    Serial.println("No saved credentials.");
     // open softap mode and wait for connection.
     device_mode = TherapyDevice::DeviceMode::Setup;
     String softAP_ssid = generateSSID(device_info);
@@ -72,7 +75,7 @@ void setup() {
 
       int numSSID = WiFi.scanNetworks();
       if (numSSID == -1) {
-        Serial.println("Couldn't get a wifi connection");
+        Serial.println("Warning: Couldn't get a WiFi connection..");
         // if no wifi exists, who cares. Let the user manually enter an SSID
       }
 
@@ -93,7 +96,7 @@ void setup() {
     bool connected = attemptWifiConnection(saved_credentials);
     if (connected) {
       Serial.println("Connected to wifi, allowing connection from web app(pairing)");
-      enterPairingMode(prefs,device_mode);
+      enterPairingMode(device_mode, server);
     } else {
       Serial.println("Could not connect to wifi, entering setup mode again.");
       enterSetupMode(prefs);
@@ -106,8 +109,7 @@ void loop() {
     handleSoftAP(server, ssid_list, prefs);
   }
   if (device_mode == TherapyDevice::DeviceMode::Pairing) {
-    // handlePairing();
-    delay(1);
+    handlePairing(prefs, server);
   }
   // handleNetworkTask();
   // handleMotorStuff();

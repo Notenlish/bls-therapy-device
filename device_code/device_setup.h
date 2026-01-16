@@ -10,35 +10,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-bool parsePostData(HTTPRequest &http_req, WiFiCredentials &wifi_credentials) {
-  JSONVar obj = JSON.parse(http_req.body);
-  if (JSON.typeof(obj) == "undefined") {
-    Serial.println("Parsing input failed!");
-    return false;
-  }
 
-  Serial.print("JSON.typeof(obj): ");
-  Serial.println(JSON.typeof(obj));
-
-  // Serial.print("has ssid: ");
-  // Serial.println(obj.hasOwnProperty("ssid"));
-
-  // Serial.print("has password: ");
-  // Serial.println(obj.hasOwnProperty("password"));
-
-  if (!obj.hasOwnProperty("ssid") || !obj.hasOwnProperty("password")) {
-    Serial.println("ssid / password missing.");
-    return false;
-  }
-
-  if (obj.hasOwnProperty("ssid_custom")) {
-    obj["ssid"] = (String)obj["ssid_custom"];
-  }
-
-  wifi_credentials.ssid = (String)obj["ssid"];
-  wifi_credentials.password = (String)obj["password"];
-  return true;
-}
 
 void sendPage(WiFiClient &client, String (&ssid_list)[MAX_SSIDS]) {
   // F() is used to make these texts stay in flash and not be copied to ram.
@@ -181,6 +153,7 @@ void sendPage(WiFiClient &client, String (&ssid_list)[MAX_SSIDS]) {
   Serial.println("Finished sending the whole page.");
 }
 
+
 void sendStatus(WiFiClient &client, bool &successful) {
   int content_length;
   if (successful)
@@ -199,10 +172,53 @@ void sendStatus(WiFiClient &client, bool &successful) {
     client.print("{ \"valid\":\"false\" }");
 }
 
+
+void enterSetupMode(Preferences &prefs) {
+  Serial.println("Entering setup mode.");
+  prefs.begin("wifi", false);  // false --> Read-Write mode
+  prefs.putString("ssid", "");
+  prefs.putString("password", "");
+  prefs.end();
+
+  ESP.restart();
+}
+
+
+bool parseSetupPostData(HTTPRequest &http_req, WiFiCredentials &wifi_credentials) {
+  JSONVar obj = JSON.parse(http_req.body);
+  if (JSON.typeof(obj) == "undefined") {
+    Serial.println("Parsing input failed!");
+    return false;
+  }
+
+  Serial.print("JSON.typeof(obj): ");
+  Serial.println(JSON.typeof(obj));
+
+  // Serial.print("has ssid: ");
+  // Serial.println(obj.hasOwnProperty("ssid"));
+
+  // Serial.print("has password: ");
+  // Serial.println(obj.hasOwnProperty("password"));
+
+  if (!obj.hasOwnProperty("ssid") || !obj.hasOwnProperty("password")) {
+    Serial.println("ssid / password missing.");
+    return false;
+  }
+
+  if (obj.hasOwnProperty("ssid_custom")) {
+    obj["ssid"] = (String)obj["ssid_custom"];
+  }
+
+  wifi_credentials.ssid = (String)obj["ssid"];
+  wifi_credentials.password = (String)obj["password"];
+  return true;
+}
+
+
 void handleSoftAP(WiFiServer &server, String (&ssid_list)[MAX_SSIDS],
                   Preferences &prefs) {
   HTTPRequest http_req;
-  WiFiClient client = server.available();
+  WiFiClient client = server.accept();
 
   // Serial.print("loop client: ");
   // Serial.println(client);
@@ -223,6 +239,7 @@ void handleSoftAP(WiFiServer &server, String (&ssid_list)[MAX_SSIDS],
     // and then the data(must be json)
     // then try to connect, depending on whether it works or not, then just send
     // back a "successful" or "unsuccessful" message.
+    // TODO: I forgot to fix the "successful" and "unsuccessful" message thingies.
 
     String line = client.readStringUntil('\n'); // "" --> String, '' --> char
     Serial.print("read line:  ");
@@ -268,15 +285,15 @@ void handleSoftAP(WiFiServer &server, String (&ssid_list)[MAX_SSIDS],
     }
   }
 
-  heap_caps_check_integrity_all(true); // catch corruption early
+  // heap_caps_check_integrity_all(true); // catch corruption early
 
   if (http_req.method == "get" && http_req.uri == "/") {
     Serial.println("got GET request, sending back page...");
 
-    Serial.printf("stack high water mark: %u words (%u bytes)\n",
-                  (unsigned)uxTaskGetStackHighWaterMark(NULL),
-                  (unsigned)uxTaskGetStackHighWaterMark(NULL) * 4);
-    heap_caps_check_integrity_all(true); // catch corruption early
+    // Serial.printf("stack high water mark: %u words (%u bytes)\n",
+    //               (unsigned)uxTaskGetStackHighWaterMark(NULL),
+    //               (unsigned)uxTaskGetStackHighWaterMark(NULL) * 4);
+    // heap_caps_check_integrity_all(true); // catch corruption early
     sendPage(client, ssid_list);
   }
 
@@ -301,7 +318,7 @@ void handleSoftAP(WiFiServer &server, String (&ssid_list)[MAX_SSIDS],
     }
 
     WiFiCredentials wifi_credentials;
-    bool if_valid_credentials = parsePostData(http_req, wifi_credentials);
+    bool if_valid_credentials = parseSetupPostData(http_req, wifi_credentials);
     Serial.print("wifi credentials received:\n");
     Serial.print("ssid: ");
     Serial.print(wifi_credentials.ssid);
