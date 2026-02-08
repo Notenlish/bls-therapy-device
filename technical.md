@@ -19,6 +19,8 @@ Bunun için de şöyle olacak: Web uygulamadan "cihaz ekle" kısmından qr kod o
 
 Not: esp32c3 cihazı o anda wifiye bağlı ama pairlenmemiş bir halde. Pairlenmediyse http sunucusu açık olacak [ipAdresi:32406] adresinde. Ip adresi almak için [mdns] kullan. Mdns olmazsa ip subnet araması yap, en kötü ihtimal elle ip adresi gir(it technician fln varsa).
 
+websocket yapcan eşşek.
+
 Sonrasında bu /pair adresine istek gelecek, esp32c3 arkadaşımız bu gelen isteğe bakacak veriler doğru mu diye, doğru ise tamamdır diyecek ve pairlenmiş olacak. Pairlenmiş ise pair endpoint'ini kapat.
 
 Pairlenmiş esp32c3 bu sefer web sayfasından gelecek web socket bağlantısını bekleyecek. Websocket ilk açıldığı zaman _sessionKey_ gönderilmesi lazım ve doğru olmalı, doğru değilse yeniden göndermesini iste. Doğruluğu ispatlandıktan sonra o websocket bağlantısına güven.

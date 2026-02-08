@@ -83,7 +83,7 @@ void handlePairing(Preferences &prefs, WiFiServer &server) {
 
   if (http_req.method == "get" && http_req.uri == "/") {
     Serial.println("got GET request, sending back page...");
-    // sendPage(client, ssid_list);
+    sendPage(client, ssid_list);
   }
 
   if (http_req.method == "post" && http_req.uri == "/save" && http_req.content_length > 0) {
@@ -103,6 +103,6 @@ void handlePairing(Preferences &prefs, WiFiServer &server) {
       }
     }
 
-    // bool if_valid_credentials = parseSetupPostData(http_req, wifi_credentials);
+    bool if_valid_credentials = parseSetupPostData(http_req, wifi_credentials);
   }
 }
